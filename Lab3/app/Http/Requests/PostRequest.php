@@ -30,9 +30,21 @@ class PostRequest extends FormRequest
             ],
             'content' => 'required|min:10',
             'user_id' => 'required|exists:users,id',
-            'image' => 'nullable|image|mimes:jpg,png|max:2048',
+            'image' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
         ];
 
         return $rules;
+    }
+    
+    /**
+     * Get custom messages for validator errors.
+     *
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [
+            'image.mimes' => 'The image must be a file of type: jpg, jpeg, or png.',
+        ];
     }
 }

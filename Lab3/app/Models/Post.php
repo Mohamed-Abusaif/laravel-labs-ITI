@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Cviebrock\EloquentSluggable\Sluggable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\UploadedFile;
 
 class Post extends Model
 {
@@ -40,18 +41,61 @@ class Post extends Model
     }
     
     /**
+     * Set the post's image.
+     * 
+     * This mutator handles automatic storage of uploaded files,
+     * and cleanup of old files when updating.
+     */
+    protected function image(): Attribute
+    {
+        return Attribute::make(
+            set: function ($value) {
+                // If value is an UploadedFile instance (from form upload)
+                if ($value instanceof UploadedFile) {
+                    // Delete old image if exists
+                    if (isset($this->attributes['image']) && $this->attributes['image']) {
+                        Storage::disk('public')->delete($this->attributes['image']);
+                    }
+                    
+                    // Store new image and return path
+                    return $value->store('posts', 'public');
+                }
+                
+                return $value;
+            },
+        );
+    }
+    
+    /**
      * Get the post's image URL.
      */
     protected function imageUrl(): Attribute
     {
         return Attribute::make(
             get: function ($value, $attributes) {
-                if (!isset($attributes['image']) || is_null($attributes['image'])) {
+                if (!isset($attributes['image']) || empty($attributes['image'])) {
                     return null;
                 }
-                return Storage::disk('public')->url($attributes['image']);
+                
+                // The proper way to get URLs for public disk
+                return asset('storage/' . $attributes['image']);
             },
         );
+    }
+    
+    /**
+     * Convert raw image path to URL
+     * 
+     * @return string|null
+     */
+    public function getImageUrlAttribute()
+    {
+        // This is a fallback accessor in case the Attribute class doesn't work
+        if (!$this->attributes['image']) {
+            return null;
+        }
+        
+        return asset('storage/' . $this->attributes['image']);
     }
     
     /**
@@ -60,8 +104,8 @@ class Post extends Model
     protected static function booted()
     {
         static::deleting(function ($post) {
-            if ($post->image) {
-                Storage::disk('public')->delete($post->image);
+            if (isset($post->attributes['image']) && $post->attributes['image']) {
+                Storage::disk('public')->delete($post->attributes['image']);
             }
         });
     }

@@ -63,7 +63,7 @@
                     
                     @if($post->image)
                     <div class="mb-2">
-                        <img src="{{ $post->image_url }}" alt="{{ $post->title }}" class="max-w-xs rounded-lg shadow-md">
+                        <img src="{{ $post->image_url ?? $post->getImageUrlAttribute() }}" alt="{{ $post->title }}" class="max-w-xs rounded-lg shadow-md">
                         <div class="mt-1 text-sm text-gray-500">Current image</div>
                     </div>
                     @endif

@@ -36,7 +36,7 @@
             
             @if($post->image)
             <figure class="my-4">
-                <img src="{{ $post->image_url }}" alt="{{ $post->title }}" class="rounded-lg max-w-full md:max-w-lg shadow-md">
+                <img src="{{ $post->image_url ?? $post->getImageUrlAttribute() }}" alt="{{ $post->title }}" class="rounded-lg max-w-full md:max-w-lg shadow-md">
             </figure>
             @endif
             

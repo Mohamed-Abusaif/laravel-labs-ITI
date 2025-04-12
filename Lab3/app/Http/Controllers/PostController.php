@@ -37,11 +37,7 @@ class PostController extends Controller
     {
         $data = $request->validated();
         
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('posts', 'public');
-        }
-        
+        // Image will be automatically handled by the mutator
         Post::create($data);
 
         return redirect()->route('posts.index')
@@ -58,16 +54,7 @@ class PostController extends Controller
     {
         $data = $request->validated();
         
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            // Delete old image if it exists
-            if ($post->image) {
-                Storage::disk('public')->delete($post->image);
-            }
-            
-            $data['image'] = $request->file('image')->store('posts', 'public');
-        }
-        
+        // Image will be automatically handled by the mutator
         $post->update($data);
 
         return redirect()->route('posts.index')
