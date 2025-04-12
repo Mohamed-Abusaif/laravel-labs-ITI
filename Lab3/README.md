@@ -1,66 +1,171 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel Blog Application
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based blog application with features including post management, image uploads, slugs, job queues, and task scheduling.
 
-## About Laravel
+## Features Implemented
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. Post Management with Validation
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Create, read, update, and delete posts
+- Form request validation for all inputs
+- Title requirements: minimum 3 characters, unique
+- Content requirements: minimum 10 characters
+- Validation ensures unique titles with proper exception handling for updates
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 2. Automatic Slug Generation
 
-## Learning Laravel
+- Slugs automatically generated from post titles
+- Uses [cviebrock/eloquent-sluggable](https://github.com/cviebrock/eloquent-sluggable) package
+- Slugs displayed in the index page
+- URLs are SEO-friendly
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 3. Image Upload System
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- Upload images for posts (JPG, PNG only)
+- Images stored in the public storage directory
+- Automatic image management:
+  - Old images are removed when updated
+  - Images are deleted when posts are deleted
+- Uses Laravel Storage facades and mutators/accessors
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 4. Queue System
 
-## Laravel Sponsors
+- Database queue driver configured
+- `PruneOldPostsJob` for removing posts older than 2 years
+- Automatically handles image deletion when pruning posts
+- Job logs information about deleted posts
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### 5. Task Scheduling
 
-### Premium Partners
+- Scheduled task to run `PruneOldPostsJob` daily at midnight
+- Uses Laravel's built-in scheduler
+- Can be customized to run at different intervals
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Installation
 
-## Contributing
+1. Clone the repository
+2. Navigate to the project directory
+   ```bash
+   cd Lab3
+   ```
+3. Install dependencies
+   ```bash
+   composer install
+   ```
+4. Create a copy of the `.env.example` file
+   ```bash
+   cp .env.example .env
+   ```
+5. Generate an application key
+   ```bash
+   php artisan key:generate
+   ```
+6. Configure your database in `.env` (SQLite is used by default)
+7. Run migrations
+   ```bash
+   php artisan migrate
+   ```
+8. Create a storage link
+   ```bash
+   php artisan storage:link
+   ```
+9. Start the development server
+   ```bash
+   php artisan serve
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Configuration
 
-## Code of Conduct
+### Queue Configuration
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+The application is configured to use the database queue driver. The configuration is in the `.env` file:
 
-## Security Vulnerabilities
+```
+QUEUE_CONNECTION=database
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### File Storage Configuration
 
-## License
+The application uses the public disk for file storage. The configuration is in the `.env` file:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+FILESYSTEM_DISK=public
+```
+
+## Testing Features
+
+### Testing Post Creation with Image Upload
+
+1. Navigate to `http://localhost:8000/posts`
+2. Click on "Create Post"
+3. Fill in the form with title, content, and select an image
+4. Choose a user from the dropdown
+5. Click "Create Post"
+6. Verify the post was created with the image displayed
+
+### Testing Post Update with Image Replacement
+
+1. Navigate to an existing post's edit page
+2. Change the post details as needed
+3. Upload a new image
+4. Submit the form
+5. Verify the old image was replaced and the post was updated
+
+### Testing Post Deletion
+
+1. Navigate to a post's detail view
+2. Click "Delete"
+3. Confirm deletion
+4. Verify the post is deleted and the associated image is removed from storage
+
+### Testing Queue and Jobs
+
+1. Run the queue worker:
+   ```bash
+   php artisan queue:work
+   ```
+2. Dispatch the pruning job manually for testing:
+   ```bash
+   php artisan tinker
+   dispatch(new App\Jobs\PruneOldPostsJob());
+   ```
+3. Check the logs to verify post deletion:
+   ```bash
+   tail -f storage/logs/laravel.log
+   ```
+
+### Testing Task Scheduling
+
+1. Run the scheduler manually to test:
+   ```bash
+   php artisan schedule:run
+   ```
+2. To set up the scheduler on your server, add this cron job:
+   ```
+   * * * * * cd /path-to-your-project && php artisan schedule:run >> /dev/null 2>&1
+   ```
+
+## Advanced Usage
+
+### Customizing the Prune Threshold
+
+The `PruneOldPostsJob` is configured to delete posts older than 2 years. To change this threshold, modify the job class:
+
+```php
+// Change this line in app/Jobs/PruneOldPostsJob.php
+$twoYearsAgo = Carbon::now()->subYears(2); // Change 2 to your desired value
+```
+
+### Regenerating Slugs for Existing Posts
+
+If you need to regenerate slugs for all existing posts:
+
+```bash
+php artisan db:seed --class=PostSlugSeeder
+```
+
+## Notes
+
+- Make sure your web server has write permissions to the storage directory
+- For production, configure a proper queue worker or use Supervisor
+- The image functionality uses Laravel's accessor/mutator pattern for clean code

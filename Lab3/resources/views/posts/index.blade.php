@@ -41,6 +41,7 @@
                         <tr>
                             <th>#</th>
                             <th>Title</th>
+                            <th>Slug</th>
                             <th>Posted By</th>
                             <th>Created At</th>
                             <th>Actions</th>
@@ -51,6 +52,7 @@
                         <tr>
                             <td>{{ $post->id }}</td>
                             <td>{{ $post->title }}</td>
+                            <td>{{ $post->slug }}</td>
                             <td>{{ $post->user->name }}</td>
                             <td>{{ $post->created_at->format('Y-m-d') }}</td>
                             <td class="flex gap-2">

@@ -17,7 +17,7 @@
         <div class="card-body">
             <h2 class="card-title mb-4">New Post Details</h2>
             
-            <form action="{{ route('posts.store') }}" method="POST">
+            <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="form-control mb-4">
                     <label for="title" class="label">
@@ -48,6 +48,23 @@
                         class="textarea textarea-bordered @error('content') textarea-error @enderror"
                         required>{{ old('content') }}</textarea>
                     @error('content')
+                        <div class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        </div>
+                    @enderror
+                </div>
+                
+                <div class="form-control mb-4">
+                    <label for="image" class="label">
+                        <span class="label-text">Image (JPG, PNG)</span>
+                    </label>
+                    <input
+                        type="file"
+                        id="image"
+                        name="image"
+                        accept=".jpg, .jpeg, .png"
+                        class="file-input file-input-bordered w-full @error('image') input-error @enderror">
+                    @error('image')
                         <div class="label">
                             <span class="label-text-alt text-error">{{ $message }}</span>
                         </div>

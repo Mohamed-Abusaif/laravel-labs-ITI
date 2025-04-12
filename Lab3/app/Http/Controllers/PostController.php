@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\User;
+use App\Http\Requests\PostRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -31,15 +33,16 @@ class PostController extends Controller
         return view('posts.create', compact('users'));
     }
 
-    public function store(Request $request)
+    public function store(PostRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'user_id' => 'required|exists:users,id',
-        ]);
-
-        Post::create($request->all());
+        $data = $request->validated();
+        
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('posts', 'public');
+        }
+        
+        Post::create($data);
 
         return redirect()->route('posts.index')
                          ->with('success', 'Post created successfully.');
@@ -51,15 +54,21 @@ class PostController extends Controller
         return view('posts.edit', compact('post', 'users'));
     }
 
-    public function update(Request $request, Post $post)
+    public function update(PostRequest $request, Post $post)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'user_id' => 'required|exists:users,id',
-        ]);
-
-        $post->update($request->all());
+        $data = $request->validated();
+        
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if it exists
+            if ($post->image) {
+                Storage::disk('public')->delete($post->image);
+            }
+            
+            $data['image'] = $request->file('image')->store('posts', 'public');
+        }
+        
+        $post->update($data);
 
         return redirect()->route('posts.index')
                          ->with('success', 'Post updated successfully.');
@@ -74,6 +83,7 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         if (request()->has('confirm') && request('confirm') === 'yes') {
+            // Image deletion is now handled in the model's boot method
             $post->delete();
             return redirect()->route('posts.index')
                              ->with('success', 'Post deleted successfully.');

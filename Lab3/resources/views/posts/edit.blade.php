@@ -16,9 +16,9 @@
 
     <div class="card bg-base-100 shadow-xl mx-auto max-w-2xl">
         <div class="card-body">
-            <h2 class="card-title mb-4">Update Post Details</h2>
+            <h2 class="card-title mb-4">Edit Post Details</h2>
             
-            <form action="{{ route('posts.update', $post) }}" method="POST">
+            <form action="{{ route('posts.update', $post) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="form-control mb-4">
@@ -55,6 +55,32 @@
                         </div>
                     @enderror
                 </div>
+                
+                <div class="form-control mb-4">
+                    <label for="image" class="label">
+                        <span class="label-text">Image (JPG, PNG)</span>
+                    </label>
+                    
+                    @if($post->image)
+                    <div class="mb-2">
+                        <img src="{{ $post->image_url }}" alt="{{ $post->title }}" class="max-w-xs rounded-lg shadow-md">
+                        <div class="mt-1 text-sm text-gray-500">Current image</div>
+                    </div>
+                    @endif
+                    
+                    <input
+                        type="file"
+                        id="image"
+                        name="image"
+                        accept=".jpg, .jpeg, .png"
+                        class="file-input file-input-bordered w-full @error('image') input-error @enderror">
+                    <div class="mt-1 text-sm text-gray-500">Leave empty to keep the current image</div>
+                    @error('image')
+                        <div class="label">
+                            <span class="label-text-alt text-error">{{ $message }}</span>
+                        </div>
+                    @enderror
+                </div>
 
                 <div class="form-control mb-6">
                     <label for="user_id" class="label">
@@ -67,7 +93,7 @@
                         required>
                         <option value="" disabled>Select user</option>
                         @foreach($users as $user)
-                        <option value="{{ $user->id }}" {{ (old('user_id', $post->user_id) == $user->id) ? 'selected' : '' }}>{{ $user->name }}</option>
+                        <option value="{{ $user->id }}" {{ old('user_id', $post->user_id) == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
                         @endforeach
                     </select>
                     @error('user_id')
